@@ -93,8 +93,20 @@
                 font-weight: inherit;
             }
 
+            body {
+                background-color: #1e1e1e;
+                color: white;
+            }
+            h1 {
+                font-size: 32px;
+                margin-bottom: 25px;
+                text-align: center;
+            }
             .content {
-                position: fixed;
+                max-width: 800px;
+                margin: 0 auto;
+                width: 100%;
+                position: absolute;
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
@@ -103,65 +115,112 @@
                 align-items: center;
                 flex-direction: column;
             }
-            h1 {
-                font-size: 30px;
-                font-weight: 700;
-                margin-bottom: 30px;
-                text-decoration: underline;
+            .form__container {
+                padding: 0px 10px;
+                margin-bottom: 20px;
             }
             form {
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                flex-direction: column;
+                gap: 40px;
+            }
+            @media (max-width: 575px) {
+                form {
+                    gap: 20px;
+                }
+            }
+            @media (max-width: 424px) {
+                form {
+                    flex-direction: column;
+                }
+            }
+            .input__task {
+                border-radius: 20px;
+                background-color: #8181816b;
+                padding: 10px;
+                font-size: 22px;
+                line-height: 22px;
+                color: white;
+            }
+            @media (max-width: 575px) {
+                .input__task {
+                    font-size: 20px;
+                    line-height: 20px;
+                }
+            }
+            input::placeholder {
+                color: #818181;
+                font-weight: 600;
             }
             .form-btn {
-                background: none;
-                border: 1px solid black;
-                padding: 10px 25px;
-                margin-bottom: 5px;
-            }
-            .task-btn {
-                margin-bottom: 10px;
-                font-size: 20px;
-                text-align: center;
-                background: none;
-                box-shadow: 0px 0px 2px 2px black;
-                padding: 2px 10px;
-                transition: all 0.3s ease-out;
-            }
-            h2 {
-                margin-top: 20px;
-                margin-bottom: 20px;
-                font-size: 25px;
+                font-size: 24px;
+                font-weight: 700;
+                letter-spacing: 1px;
+                background-color: rgb(236, 72, 153);
+                background-image: linear-gradient(
+                    90deg,
+                    rgba(236, 72, 153, 1) 0%,
+                    rgba(145, 91, 241, 1) 35%,
+                    rgba(145, 91, 241, 1) 100%
+                );
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
             }
             .tasks_content {
-                width: 300px;
+                width: 100%;
+                display: flex;
+                justify-content: flex-start;
+                align-items: center;
+            }
+            .task-btn {
+                width: 30px;
+                height: 30px;
+                border: 1px solid white;
+                background: none;
+                border-radius: 5px;
+            }
+            .tasks__text {
+                border-radius: 10px;
+                background-color: #8181816b;
+                padding: 10px;
+                font-size: 20px;
+                line-height: 20px;
+                color: white;
+                flex: 1 1 auto;
+            }
+            ul {
+                padding: 0px 10px;
+                width: 100%;
+            }
+            li {
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                text-align: center;
-                border: 1px solid black;
-                border-radius: 5px;
-                padding: 10px;
+                gap: 15px;
                 margin-bottom: 10px;
+            }
+            li:nth-last-child {
+                margin-bottom: 0px;
             }
         </style>
     </head>
     <body>
         <div class="content">
-            <h1>This is my first TO DO list</h1>
-            <form action="/tasks" method="post">
-                <input
-                    type="text"
-                    required
-                    name="task"
-                    class="tasks_content"
-                    id=""
-                />
-                <button class="form-btn" type="submit">Добавить</button>
-            </form>
-            <h2>To Do list</h2>
+            <h1>To Do list</h1>
+            <div class="form__container">
+                <form action="/tasks" method="post">
+                    <input
+                        type="text"
+                        required
+                        name="task"
+                        class="input__task"
+                        id=""
+                        placeholder="Напиши задачу"
+                    />
+                    <button class="form-btn" type="submit">Добавить</button>
+                </form>
+            </div>
             <div class="tasks_content">
                 <ul id="tasks"></ul>
             </div>
@@ -171,26 +230,36 @@
                 .then((response) => response.json())
                 .then((tasks) => {
                     const tasksList = document.getElementById("tasks");
+
                     tasks.forEach((task) => {
                         const li = document.createElement("li");
                         const button = document.createElement("button");
                         button.setAttribute("data-id", task.id);
                         button.setAttribute("class", "task-btn");
-                        button.innerHTML = task.task;
+
+                        // Создание элемента для текста задачи
+                        const div = document.createElement("div");
+                        div.setAttribute("class", "tasks__text");
+                        div.setAttribute("id", task.id);
+                        div.innerHTML = task.task;
+
                         li.appendChild(button);
+                        li.appendChild(div);
                         tasksList.appendChild(li);
 
                         button.addEventListener("click", (event) => {
                             const taskId = event.target.dataset.id;
                             const url = `/tasks/${taskId}`;
+                            const text = document.getElementById(`${taskId}`);
                             fetch(url, {
                                 method: "DELETE", // Добавьте эту строку, чтобы указать метод DELETE
                             }).then((response) => {
                                 setTimeout(() => {
-                                    button.style.textDecoration =
-                                        "line-through";
+                                    button.style.backgroundColor = "#008000";
+                                    text.style.textDecoration = "line-through";
                                     setTimeout(() => {
                                         button.style.display = "none";
+                                        text.style.display = "none";
                                     }, 500);
                                 }, 500);
                             });
